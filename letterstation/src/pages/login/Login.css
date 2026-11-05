@@ -1,0 +1,89 @@
+/* Container principal que ocupa a tela toda e centraliza o conteúdo */
+.login-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  background-color: #121214; /* Tom escuro combinando com o VS Code */
+  font-family: Arial, sans-serif;
+  color: #ffffff;
+}
+
+/* Caixa do formulário */
+.login-box {
+  background-color: #202024;
+  padding: 2.5rem;
+  border-radius: 8px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+  width: 100%;
+  max-width: 400px;
+}
+
+.login-box h2 {
+  margin-bottom: 2rem;
+  text-align: center;
+  color: #ff477e; /* Cor rosa/magenta de destaque (similar ao seu tema) */
+}
+
+/* Grupos de entrada (Labels e Inputs) */
+.input-group {
+  margin-bottom: 1.5rem;
+  display: flex;
+  flex-direction: column;
+}
+
+.input-group label {
+  margin-bottom: 0.5rem;
+  font-size: 0.9rem;
+  color: #c4c4cc;
+}
+
+.input-group input {
+  padding: 0.75rem;
+  border-radius: 4px;
+  border: 1px solid #29292e;
+  background-color: #121214;
+  color: #fff;
+  font-size: 1rem;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.input-group input:focus {
+  border-color: #ff477e;
+}
+
+/* Botão de envio */
+.login-btn {
+  width: 100%;
+  padding: 0.75rem;
+  background-color: #ff477e;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  font-size: 1rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: filter 0.2s;
+}
+
+.login-btn:hover {
+  filter: brightness(0.9);
+}
+
+/* Rodapé do formulário */
+.login-footer {
+  margin-top: 1.5rem;
+  text-align: center;
+  font-size: 0.85rem;
+  color: #8d8d99;
+}
+
+.login-footer a {
+  color: #ff477e;
+  text-decoration: none;
+}
+
+.login-footer a:hover {
+  text-decoration: underline;
+}
