@@ -1,11 +1,31 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import heroImg from './assets/hero.png'
 import reactLogo from './assets/react.svg'
 import viteLogo from './assets/vite.svg'
+import Cadastro from './pages/cadastro/Cadastro.jsx'
+import Perfil from './pages/perfil/Perfil.jsx'
 import './App.css'
 
 function App() {
   const [count, setCount] = useState(0)
+  const [pathname, setPathname] = useState(window.location.pathname)
+
+  useEffect(() => {
+    function handlePopState() {
+      setPathname(window.location.pathname)
+    }
+
+    window.addEventListener('popstate', handlePopState)
+    return () => window.removeEventListener('popstate', handlePopState)
+  }, [])
+
+  if (pathname.replace(/\/+$/, '') === '/cadastro') {
+    return <Cadastro />
+  }
+
+  if (pathname.replace(/\/+$/, '') === '/perfil') {
+    return <Perfil />
+  }
 
   return (
     <>

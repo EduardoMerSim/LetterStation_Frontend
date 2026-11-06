@@ -1,0 +1,219 @@
+.perfil-page {
+  box-sizing: border-box;
+  display: flex;
+  width: 100%;
+  min-height: 100vh;
+  min-height: 100svh;
+  background: #f7f7fb;
+  color: #242333;
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  text-align: left;
+}
+
+.perfil-sidebar {
+  box-sizing: border-box;
+  display: flex;
+  width: 72px;
+  flex: 0 0 72px;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 0;
+  border-right: 1px solid #e9e8f0;
+  background: #fff;
+}
+
+.perfil-nav-link {
+  display: grid;
+  width: 44px;
+  height: 40px;
+  place-items: center;
+  border-radius: 9px;
+  color: #777587;
+  font-size: 28px;
+  line-height: 1;
+  text-decoration: none;
+  transition: background-color 150ms ease, color 150ms ease;
+}
+
+.perfil-nav-link:hover,
+.perfil-nav-link:focus-visible {
+  outline: none;
+  background: #f0edff;
+  color: #7057e8;
+}
+
+.perfil-sidebar-avatar {
+  display: grid;
+  width: 34px;
+  height: 34px;
+  margin-top: auto;
+  place-items: center;
+  border: 1px solid #dedde7;
+  border-radius: 50%;
+  background: #f7f7fb;
+  color: #7057e8;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.perfil-main {
+  position: relative;
+  display: flex;
+  min-width: 0;
+  flex: 1;
+  justify-content: center;
+  padding: 76px 32px 48px;
+}
+
+.perfil-configuracoes {
+  position: absolute;
+  top: 20px;
+  right: 28px;
+  color: #777587;
+  font-size: 28px;
+  line-height: 1;
+}
+
+.perfil-conteudo {
+  width: min(100%, 760px);
+}
+
+.perfil-resumo {
+  display: grid;
+  grid-template-columns: 112px minmax(0, 1fr);
+  gap: 14px 20px;
+  align-items: center;
+}
+
+.perfil-avatar {
+  display: grid;
+  width: 96px;
+  aspect-ratio: 1;
+  place-items: center;
+  border: 2px solid #fff;
+  border-radius: 50%;
+  background: #f0edff;
+  box-shadow: 0 0 0 1px #e3defc;
+  color: #7057e8;
+  font-size: 24px;
+  font-weight: 600;
+}
+
+.perfil-detalhes {
+  display: grid;
+  gap: 12px;
+}
+
+.perfil-username,
+.perfil-resenhas h2,
+.perfil-resenha h3 {
+  margin: 0;
+  color: #242333;
+}
+
+.perfil-username {
+  padding: 10px 14px;
+  border: 1px solid #e9e8f0;
+  border-radius: 9px;
+  background: #fff;
+  font-size: 16px;
+  font-weight: 600;
+  text-align: left;
+}
+
+.perfil-bio {
+  display: grid;
+  min-height: 66px;
+  padding: 10px 14px;
+  place-items: center start;
+  border: 1px solid #e9e8f0;
+  border-radius: 9px;
+  background: #fff;
+  color: #777587;
+  font-size: 14px;
+}
+
+.perfil-seguidores {
+  grid-column: 1 / 2;
+  justify-self: center;
+  min-width: 132px;
+  padding: 8px 14px;
+  border: 1px solid #e3defc;
+  border-radius: 8px;
+  background: #f0edff;
+  color: #6047d4;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+.perfil-resenhas {
+  width: min(100%, 500px);
+  margin: 40px auto 0;
+}
+
+.perfil-resenhas h2 {
+  margin-bottom: 12px;
+  font-size: 15px;
+  font-weight: 600;
+  text-align: center;
+}
+
+.perfil-resenha {
+  box-sizing: border-box;
+  display: grid;
+  min-height: 132px;
+  padding: 22px;
+  place-content: center;
+  gap: 8px;
+  border: 1px solid #e9e8f0;
+  border-radius: 14px;
+  background: #fff;
+  box-shadow: 0 8px 24px rgba(34, 30, 66, 0.05);
+  text-align: center;
+}
+
+.perfil-resenha h3 {
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.perfil-resenha p {
+  color: #777587;
+  font-size: 13px;
+}
+
+@media (max-width: 560px) {
+  .perfil-sidebar {
+    width: 56px;
+    flex-basis: 56px;
+  }
+
+  .perfil-main {
+    padding: 72px 18px 32px;
+  }
+
+  .perfil-configuracoes {
+    right: 18px;
+  }
+
+  .perfil-resumo {
+    grid-template-columns: 76px minmax(0, 1fr);
+    gap: 10px;
+  }
+
+  .perfil-avatar {
+    width: 68px;
+  }
+
+  .perfil-seguidores {
+    min-width: 0;
+    width: 100%;
+  }
+
+  .perfil-resenhas {
+    margin-top: 30px;
+  }
+}
