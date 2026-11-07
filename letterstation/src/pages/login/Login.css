@@ -22,7 +22,7 @@
 .login-box h2 {
   margin-bottom: 2rem;
   text-align: center;
-  color: #ff477e; /* Cor rosa/magenta de destaque (similar ao seu tema) */
+  color: #9e27ff; /* Cor rosa/magenta de destaque (similar ao seu tema) */
 }
 
 /* Grupos de entrada (Labels e Inputs) */
@@ -50,14 +50,14 @@
 }
 
 .input-group input:focus {
-  border-color: #ff477e;
+  border-color: #9e27ff;
 }
 
 /* Botão de envio */
 .login-btn {
   width: 100%;
   padding: 0.75rem;
-  background-color: #ff477e;
+  background-color: #9e27ff;
   color: #fff;
   border: none;
   border-radius: 4px;
@@ -80,10 +80,44 @@
 }
 
 .login-footer a {
-  color: #ff477e;
+  color: #9e27ff;
   text-decoration: none;
 }
 
 .login-footer a:hover {
   text-decoration: underline;
+}
+
+/* Lista de validação da senha */
+.password-checklist {
+  margin-bottom: 1.5rem;
+  background-color: #121214;
+  padding: 0.75rem;
+  border-radius: 4px;
+  border: 1px solid #29292e;
+}
+
+.checklist-item {
+  font-size: 0.8rem;
+  color: #8d8d99;
+  margin-bottom: 0.35rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: color 0.2s ease;
+}
+
+.checklist-item:last-child {
+  margin-bottom: 0;
+}
+
+/* Quando o critério for atendido */
+.checklist-item.valid {
+  color: #04d361; 
+  font-weight: bold;
+}
+/* Quando o critério não for atendido */
+.checklist-item:not(.valid) {
+  color: #f75a68; 
+  font-weight: bold;
 }

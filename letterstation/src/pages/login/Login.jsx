@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import './Login.css';
 
-export default function Login() {
+export default function Login({ onAlternarTela }) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
@@ -46,7 +46,10 @@ export default function Login() {
         </form>
 
         <p className="login-footer">
-          Não tem uma conta? <a href="#cadastro">Cadastre-se</a>
+          Não tem uma conta?{' '}
+          <a href="#cadastro" onClick={(e) => { e.preventDefault(); onAlternarTela('cadastro'); }}>
+            Cadastre-se
+          </a>
         </p>
       </div>
     </div>
