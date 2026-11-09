@@ -1,12 +1,43 @@
 import { useState } from 'react'
 import './Cadastro.css'
 
-function Cadastro() {
+const TAMANHO_MINIMO = 6
+
+function Cadastro({ onAlternarTela }) {
+  const [nome, setNome] = useState('')
+  const [username, setUsername] = useState('')
+  const [email, setEmail] = useState('')
+  const [senha, setSenha] = useState('')
   const [mensagem, setMensagem] = useState('')
+
+  // Regras de senha
+  const regras = {
+    tamanhoMinimo: senha.length >= TAMANHO_MINIMO,
+    temMaiuscula: /[A-Z]/.test(senha),
+    temEspecial: /[^A-Za-z0-9]/.test(senha),
+  }
+
+  const senhaValida =
+    regras.tamanhoMinimo && regras.temMaiuscula && regras.temEspecial
+
+  function irParaLogin(event) {
+    event?.preventDefault()
+    onAlternarTela?.('login')
+  }
 
   function handleSubmit(event) {
     event.preventDefault()
-    setMensagem('A tela está pronta, mas o cadastro ainda não está conectado ao servidor.')
+
+    if (!senhaValida) {
+      setMensagem('Sua senha não atende a todos os requisitos de segurança.')
+      return
+    }
+
+    // Aqui entra a chamada à API de cadastro
+    console.log('Cadastro realizado:', { nome, username, email })
+
+    setMensagem(`Conta criada com sucesso para: ${nome}`)
+    setTimeout(() => onAlternarTela?.('login'), 1500)
   }
 
   return (
@@ -14,7 +45,9 @@ function Cadastro() {
       <section className="cadastro-card" aria-labelledby="cadastro-titulo">
         <div className="cadastro-marca" aria-hidden="true">
           <span className="cadastro-marca-icone">L</span>
-          <span>Letter<span className="cadastro-marca-destaque">Station</span></span>
+          <span>
+            Letter<span className="cadastro-marca-destaque">Station</span>
+          </span>
         </div>
 
         <header className="cadastro-header">
@@ -31,6 +64,8 @@ function Cadastro() {
               type="text"
               autoComplete="name"
               placeholder="Seu nome"
+              value={nome}
+              onChange={(e) => setNome(e.target.value)}
               required
             />
           </div>
@@ -43,6 +78,8 @@ function Cadastro() {
               type="text"
               autoComplete="username"
               placeholder="Como você será chamado"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
               required
             />
           </div>
@@ -55,6 +92,8 @@ function Cadastro() {
               type="email"
               autoComplete="email"
               placeholder="voce@email.com"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
               required
             />
           </div>
@@ -66,21 +105,45 @@ function Cadastro() {
               name="senha"
               type="password"
               autoComplete="new-password"
-              placeholder="Pelo menos 8 caracteres"
-              minLength={8}
+              placeholder="Crie uma senha forte"
+              value={senha}
+              onChange={(e) => setSenha(e.target.value)}
               required
             />
           </div>
 
-          <button className="cadastro-botao" type="submit">
+          {/* Checklist dinâmico de validação */}
+          <div className="cadastro-checklist" aria-live="polite">
+            <div className={`cadastro-checklist-item ${regras.tamanhoMinimo ? 'valid' : ''}`}>
+              {regras.tamanhoMinimo ? '✓' : '✗'} Mínimo de {TAMANHO_MINIMO} caracteres
+            </div>
+            <div className={`cadastro-checklist-item ${regras.temMaiuscula ? 'valid' : ''}`}>
+              {regras.temMaiuscula ? '✓' : '✗'} Pelo menos 1 letra maiúscula
+            </div>
+            <div className={`cadastro-checklist-item ${regras.temEspecial ? 'valid' : ''}`}>
+              {regras.temEspecial ? '✓' : '✗'} Pelo menos 1 caractere especial
+            </div>
+          </div>
+
+          <button
+            className="cadastro-botao"
+            type="submit"
+            disabled={!senhaValida}
+          >
             Cadastrar
           </button>
+
           <p className="cadastro-mensagem" role="status" aria-live="polite">
             {mensagem}
           </p>
         </form>
 
-        <p className="cadastro-rodape">Sua próxima review começa aqui.</p>
+        <p className="cadastro-rodape">
+          Já tem uma conta?{' '}
+          <a href="#login" onClick={irParaLogin}>
+            Faça login
+          </a>
+        </p>
       </section>
     </main>
   )

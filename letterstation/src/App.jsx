@@ -3,9 +3,8 @@ import Cadastro from './pages/cadastro/Cadastro.jsx'
 import Home from './pages/Home.jsx'
 import Perfil from './pages/perfil/Perfil.jsx'
 import './App.css'
-import React, { useState } from 'react';
+import React from 'react';
 import Login from './pages/login/Login';
-import Cadastro from './pages/login/Cadastro';
 
 const chaveResenhas = 'letterstation-resenhas'
 const chavePerfil = 'letterstation-perfil'
@@ -154,11 +153,9 @@ function App() {
       />
     )
   }
-
-  return <Home resenhas={resenhas} perfil={perfil} onCriarResenha={criarResenha} />
-  const [telaAtiva, setTelaAtiva] = useState('login');
-
-  return (
+   const [telaAtiva, setTelaAtiva] = useState('login');
+  if (rota === '/login'){
+    return (
     <>
       {telaAtiva === 'login' ? (
         <Login onAlternarTela={setTelaAtiva} />
@@ -167,6 +164,8 @@ function App() {
       )}
     </>
   );
+  }
+  return <Home resenhas={resenhas} perfil={perfil} onCriarResenha={criarResenha} />
 }
 
 export default App;
