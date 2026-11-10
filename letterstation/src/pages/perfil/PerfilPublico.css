@@ -1,0 +1,110 @@
+/* Complementa o Perfil.css: importe os dois (o Perfil.css já é importado pelo componente). */
+
+.pp-etiqueta {
+  margin: 0;
+  color: #7057e8;
+  font-size: 11px;
+  font-weight: 750;
+  letter-spacing: 1.3px;
+}
+
+.perfil-detalhes {
+  gap: 6px;
+}
+
+/* Botão de seguir + estatísticas, alinhados com o texto ao lado do avatar. */
+.pp-acoes {
+  grid-column: 2;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 14px 20px;
+}
+
+.pp-seguir {
+  min-height: 40px;
+  padding: 0 22px;
+  border: 1px solid #7057e8;
+  border-radius: 9px;
+  background: #7057e8;
+  color: #fff;
+  cursor: pointer;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 650;
+  transition: background-color 150ms ease, color 150ms ease, border-color 150ms ease;
+}
+
+.pp-seguir:hover {
+  background: #6047d4;
+}
+
+.pp-seguir-ativo {
+  border-color: #dedde7;
+  background: #fff;
+  color: #5f5d6e;
+}
+
+.pp-seguir-ativo:hover {
+  border-color: #f3c7c4;
+  background: #fff6f5;
+  color: #b42318;
+}
+
+.pp-seguir:focus-visible {
+  outline: 3px solid rgba(112, 87, 232, 0.3);
+  outline-offset: 2px;
+}
+
+.pp-estatisticas {
+  display: flex;
+  gap: 8px;
+  margin: 0;
+}
+
+.pp-estatisticas div {
+  display: grid;
+  min-width: 78px;
+  gap: 2px;
+  padding: 7px 12px;
+  border: 1px solid #e3defc;
+  border-radius: 8px;
+  background: #f7f5ff;
+}
+
+.pp-estatisticas dt {
+  color: #777587;
+  font-size: 11px;
+}
+
+.pp-estatisticas dd {
+  margin: 0;
+  color: #6047d4;
+  font-size: 15px;
+  font-weight: 700;
+}
+
+@media (max-width: 560px) {
+  .pp-acoes {
+    grid-column: 1 / -1;
+  }
+
+  .pp-seguir {
+    width: 100%;
+  }
+
+  .pp-estatisticas {
+    width: 100%;
+  }
+
+  .pp-estatisticas div {
+    flex: 1;
+    min-width: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pp-seguir {
+    transition: none;
+  }
+}

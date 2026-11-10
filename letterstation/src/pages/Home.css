@@ -664,3 +664,123 @@
     transition: none;
   }
 }
+
+.home-nav-link {
+  display: grid;
+  width: 42px;
+  height: 42px;
+  place-items: center;
+  padding: 0;
+  border: 0;
+  border-radius: 10px;
+  background: transparent;
+  color: #7057e8;
+  cursor: pointer;
+  text-decoration: none;
+  transition: background-color 150ms ease, color 150ms ease;
+}
+
+.home-nav-link-ativo {
+  background: #f0edff;
+}
+
+/* Pop-up de pesquisa */
+.home-modal-fundo {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 12vh 16px 16px;
+  background: rgba(36, 35, 51, 0.4);
+  backdrop-filter: blur(2px);
+}
+
+.home-modal {
+  box-sizing: border-box;
+  display: grid;
+  width: min(100%, 520px);
+  gap: 16px;
+  padding: 22px;
+  border: 1px solid #e9e8f0;
+  border-radius: 14px;
+  background: #fff;
+  box-shadow: 0 24px 60px rgba(34, 30, 66, 0.2);
+}
+
+.home-modal-titulo {
+  margin: 0;
+  color: #242333;
+  font-size: 18px;
+  font-weight: 650;
+}
+
+.home-modal-campo {
+  box-sizing: border-box;
+  display: flex;
+  min-height: 46px;
+  align-items: center;
+  gap: 9px;
+  padding: 0 12px;
+  border: 1px solid #dedde7;
+  border-radius: 9px;
+  color: #8a8897;
+  transition: border-color 150ms ease, box-shadow 150ms ease;
+}
+
+.home-modal-campo:focus-within {
+  border-color: #7057e8;
+  box-shadow: 0 0 0 3px rgba(112, 87, 232, 0.14);
+}
+
+.home-modal-campo svg {
+  width: 18px;
+  height: 18px;
+  flex: 0 0 18px;
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-width: 1.8;
+}
+
+.home-modal-campo input {
+  width: 100%;
+  min-width: 0;
+  padding: 0;
+  border: 0;
+  outline: none;
+  background: transparent;
+  color: #242333;
+  font: inherit;
+  font-size: 14px;
+}
+
+.home-botao-publicar:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.home-nav-link:focus-visible {
+  outline: 3px solid rgba(112, 87, 232, 0.3);
+  outline-offset: 2px;
+}
+
+/* Tela de resultados */
+.home-voltar {
+  margin: 0 0 18px;
+  padding: 8px 12px;
+  border: 1px solid #e9e8f0;
+  border-radius: 9px;
+  background: #fff;
+  color: #5f5d6e;
+  cursor: pointer;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.home-voltar:hover {
+  background: #f0edff;
+  color: #6047d4;
+}
