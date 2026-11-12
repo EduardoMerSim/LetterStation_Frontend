@@ -29,7 +29,7 @@ function CartaoResenha({ resenha }) {
   )
 }
 
-function Home({ resenhas, perfil, onCriarResenha }) {
+function Home({ resenhas, perfil, onCriarResenha, onSair }) {
   // Estado da tela: abertura do formulário, busca no feed e nota selecionada.
   const [composerAberto, setComposerAberto] = useState(false)
   const [busca, setBusca] = useState('')
@@ -145,6 +145,14 @@ function Home({ resenhas, perfil, onCriarResenha }) {
             <circle cx="10.8" cy="10.8" r="6.8" />
             <path d="m16 16 5 5" />
           </svg>
+        </button>
+        <button className="home-sair" type="button" onClick={onSair}>
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M10 17l5-5-5-5" />
+            <path d="M15 12H3" />
+            <path d="M12 3h6a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-6" />
+          </svg>
+          <span>Sair</span>
         </button>
         <a className="home-sidebar-avatar" href="/perfil" aria-label="Abrir meu perfil">
           {perfil.foto ? (

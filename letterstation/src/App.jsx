@@ -76,6 +76,7 @@ function App() {
   const [pathname, setPathname] = useState(window.location.pathname)
   const [resenhas, setResenhas] = useState(carregarResenhas)
   const [perfil, setPerfil] = useState(carregarPerfil)
+  const [telaAtiva, setTelaAtiva] = useState('login')
 
   useEffect(() => {
     function handlePopState() {
@@ -85,6 +86,11 @@ function App() {
     window.addEventListener('popstate', handlePopState)
     return () => window.removeEventListener('popstate', handlePopState)
   }, [])
+
+  function navegar(rota) {
+    window.history.pushState({}, '', rota)
+    setPathname(rota)
+  }
 
   useEffect(() => {
     try {
@@ -153,19 +159,25 @@ function App() {
       />
     )
   }
-   const [telaAtiva, setTelaAtiva] = useState('login');
   if (rota === '/login'){
     return (
     <>
       {telaAtiva === 'login' ? (
-        <Login onAlternarTela={setTelaAtiva} />
+        <Login onAlternarTela={setTelaAtiva} onEntrar={() => navegar('/')} />
       ) : (
         <Cadastro onAlternarTela={setTelaAtiva} />
       )}
     </>
   );
   }
-  return <Home resenhas={resenhas} perfil={perfil} onCriarResenha={criarResenha} />
+  return (
+    <Home
+      resenhas={resenhas}
+      perfil={perfil}
+      onCriarResenha={criarResenha}
+      onSair={() => navegar('/login')}
+    />
+  )
 }
 
 export default App;
