@@ -23,6 +23,12 @@
   padding: 16px 0;
   border-right: 1px solid #e9e8f0;
   background: #fff;
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 100vh;
+  height: 100dvh;
+  z-index: 10;
 }
 
 .perfil-nav-link {
@@ -75,6 +81,7 @@
   flex: 1;
   justify-content: center;
   padding: clamp(72px, 11vh, 104px) 32px 48px;
+  margin-left: 72px;
 }
 
 .perfil-configuracoes {
@@ -729,6 +736,10 @@
     padding: 0 14px;
     border-right: 0;
     border-bottom: 1px solid #e9e8f0;
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 10;
   }
 
   .perfil-sidebar-avatar {
@@ -737,6 +748,8 @@
 
   .perfil-main {
     padding: 74px 16px 28px;
+    margin-left: 0;
+    margin-top: 62px;
   }
 
   .perfil-configuracoes {

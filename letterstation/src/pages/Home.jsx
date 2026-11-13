@@ -1,30 +1,55 @@
 import { useEffect, useState } from 'react'
 import './Home.css'
+import { apiFetch } from '../services/api'
 
 // Cartão de uma resenha, usado tanto no feed quanto nos resultados da pesquisa.
 function CartaoResenha({ resenha }) {
+  console.log('Dados da review:', resenha)
   return (
     <article className="home-resenha">
-      <div className="home-resenha-topo">
-        <span className="home-jogo">{resenha.jogo}</span>
-        <time dateTime={resenha.criadaEm}>
-          {new Intl.DateTimeFormat('pt-BR', { dateStyle: 'medium' }).format(new Date(resenha.criadaEm))}
-        </time>
-      </div>
-      {resenha.avaliacao > 0 && (
-        <div className="home-resenha-nota" aria-label={`Avaliação: ${resenha.avaliacao} de 5 estrelas`}>
-          <span aria-hidden="true">{'★'.repeat(resenha.avaliacao)}{'☆'.repeat(5 - resenha.avaliacao)}</span>
-          <span>{resenha.avaliacao}/5</span>
+      <div className="home-resenha-conteudo">
+        <div className="home-resenha-topo">
+          <span className="home-jogo">{resenha.jogo}</span>
+
+          <time dateTime={resenha.criadaEm}>
+            {new Intl.DateTimeFormat('pt-BR', {
+              dateStyle: 'medium',
+            }).format(new Date(resenha.criadaEm))}
+          </time>
         </div>
+
+        <h3 className="home-resenha-titulo">
+          {resenha.titulo || `Review de ${resenha.autor} - ${resenha.jogo}`}
+        </h3>
+
+        {resenha.avaliacao > 0 && (
+          <div className="home-resenha-nota"
+            aria-label={`Avaliação: ${resenha.avaliacao} de 5 estrelas`}>
+            <span aria-hidden="true">
+              {'★'.repeat(resenha.avaliacao)}
+              {'☆'.repeat(5 - resenha.avaliacao)}
+            </span>
+            <span>{resenha.avaliacao}/5</span>
+          </div>
+        )}
+
+        <p className="home-resenha-texto">{resenha.texto}</p>
+
+        <a className="home-autor" href={`/usuario/${encodeURIComponent(resenha.autor)}`}>
+          <span className="home-avatar home-avatar-pequeno" aria-hidden="true">
+            {resenha.autor.charAt(0).toUpperCase()}
+          </span>
+          <span>{resenha.autor}</span>
+        </a>
+      </div>
+
+      {resenha.capa_url && (
+        <img
+          className="home-resenha-capa"
+          src={resenha.capa_url}
+          alt={`Capa de ${resenha.jogo}`}
+        />
       )}
-      {resenha.titulo && <h3>{resenha.titulo}</h3>}
-      <p className="home-resenha-texto">{resenha.texto}</p>
-      <a className="home-autor" href={`/usuario/${encodeURIComponent(resenha.autor)}`}>
-        <span className="home-avatar home-avatar-pequeno" aria-hidden="true">
-          {resenha.autor.charAt(0).toUpperCase()}
-        </span>
-        <span>{resenha.autor}</span>
-      </a>
     </article>
   )
 }
@@ -40,6 +65,19 @@ function Home({ resenhas, perfil, onCriarResenha, onSair }) {
   const [rascunhoPesquisa, setRascunhoPesquisa] = useState('')
   const [termoPesquisa, setTermoPesquisa] = useState('')
   const [mostrandoResultados, setMostrandoResultados] = useState(false)
+  const [jogosPesquisa, setJogosPesquisa] = useState([])
+  const [usuariosPesquisa, setUsuariosPesquisa] = useState([])
+  const [carregandoPesquisa, setCarregandoPesquisa] = useState(false)
+  const [erroPesquisa, setErroPesquisa] = useState('')
+
+  //busca e exibição do feed
+  const [buscaJogo, setBuscaJogo] = useState('')
+  const [jogosEncontrados, setJogosEncontrados] = useState([])
+  const [jogoSelecionado, setJogoSelecionado] = useState(null)
+  const [carregandoJogos, setCarregandoJogos] = useState(false)
+  const [erroBuscaJogo, setErroBuscaJogo] = useState('')
+  const [erroPublicacao, setErroPublicacao] = useState('')
+  const [publicando, setPublicando] = useState(false)
 
   // Fecha o pop-up de pesquisa com a tecla Esc.
   useEffect(() => {
@@ -57,12 +95,43 @@ function Home({ resenhas, perfil, onCriarResenha, onSair }) {
   }
 
   // Envia a pesquisa do pop-up e abre a tela de resultados.
-  function handlePesquisar(event) {
+  async function handlePesquisar(event) {
     event.preventDefault()
-    if (!rascunhoPesquisa.trim()) return
-    setTermoPesquisa(rascunhoPesquisa.trim())
+
+    const termo = rascunhoPesquisa.trim()
+    if (!termo) return
+
+    setTermoPesquisa(termo)
     setMostrandoResultados(true)
     setPesquisaAberta(false)
+
+    setCarregandoPesquisa(true)
+    setErroPesquisa('')
+    setJogosPesquisa([])
+    setUsuariosPesquisa([])
+
+    try {
+      const [respostaJogos, respostaUsuarios] = await Promise.all([
+        apiFetch(`/jogos?busca=${encodeURIComponent(termo)}`),
+        apiFetch(`/usuarios?busca=${encodeURIComponent(termo)}`),
+      ])
+
+      if (!respostaJogos.ok || !respostaUsuarios.ok) {
+        throw new Error('Não foi possível carregar os resultados da pesquisa.')
+      }
+
+      const [jogos, usuarios] = await Promise.all([
+        respostaJogos.json(),
+        respostaUsuarios.json(),
+      ])
+
+      setJogosPesquisa(jogos)
+      setUsuariosPesquisa(usuarios)
+    } catch (erro) {
+      setErroPesquisa(erro.message)
+    } finally {
+      setCarregandoPesquisa(false)
+    }
   }
 
   function voltarParaInicio() {
@@ -70,9 +139,41 @@ function Home({ resenhas, perfil, onCriarResenha, onSair }) {
     setTermoPesquisa('')
     setRascunhoPesquisa('')
   }
+  async function pesquisarJogos(termo) {
+    if (!termo.trim()) {
+      setJogosEncontrados([])
+      setErroBuscaJogo('')
+      return
+    }
 
+    try {
+      setCarregandoJogos(true)
+      setErroBuscaJogo('')
+      setJogoSelecionado(null)
+
+      const resposta = await apiFetch(
+        `/jogos?busca=${encodeURIComponent(termo)}`
+      )
+
+      if (!resposta.ok) {
+        throw new Error('Não foi possível pesquisar os jogos.')
+      }
+
+      const dados = await resposta.json()
+
+      setJogosEncontrados(dados)
+
+      if (dados.length === 0) {
+        setErroBuscaJogo('Jogo não encontrado no catálogo.')
+      }
+    } catch (erro) {
+      setErroBuscaJogo(erro.message)
+    } finally {
+      setCarregandoJogos(false)
+    }
+  }
   // Valida e envia a resenha para o componente principal, que cuida de salvá-la.
-  function handleSubmit(event) {
+  async function handleSubmit(event) {
     event.preventDefault()
     const form = event.currentTarget
     const formData = new FormData(form)
@@ -93,9 +194,19 @@ function Home({ resenhas, perfil, onCriarResenha, onSair }) {
       return
     }
 
-    onCriarResenha({
-      jogo: valores[0],
-      titulo: '',
+    if (!jogoSelecionado) {
+      setErroBuscaJogo('Selecione um jogo da lista antes de publicar.')
+      return
+    }
+   setErroPublicacao('')
+  setPublicando(true)
+
+  try {
+    await onCriarResenha({
+      id_jogo: jogoSelecionado.id_jogo,
+      jogo: jogoSelecionado.nome,
+      titulo: `Review de ${perfil.username} - ${jogoSelecionado.nome}`,
+      capa_url: jogoSelecionado.capa_url,
       texto: valores[1],
       avaliacao,
       autor: perfil.username,
@@ -104,14 +215,20 @@ function Home({ resenhas, perfil, onCriarResenha, onSair }) {
 
     form.reset()
     setAvaliacao(0)
+    setJogoSelecionado(null)
+    setBuscaJogo('')
     setComposerAberto(false)
+  } catch (erro) {
+    setErroPublicacao(erro.message)
+  } finally {
+    setPublicando(false)
+  }
   }
 
   // Filtra as resenhas por jogo, texto e autor, mantendo as mais novas primeiro.
   function filtrarResenhas(termo) {
     const termoNormalizado = termo.trim().toLocaleLowerCase('pt-BR')
     return [...resenhas]
-      .reverse()
       .filter((resenha) =>
         [resenha.jogo, resenha.titulo, resenha.texto, resenha.autor]
           .join(' ')
@@ -177,28 +294,98 @@ function Home({ resenhas, perfil, onCriarResenha, onSair }) {
                   Resultados para “{termoPesquisa}”
                 </h1>
                 <p className="home-subtitulo">
-                  {resultadosPesquisa.length === 1
-                    ? '1 resenha encontrada.'
-                    : `${resultadosPesquisa.length} resenhas encontradas.`}
+                  {carregandoPesquisa
+                    ? 'Buscando resultados...'
+                    : `${jogosPesquisa.length} jogos · ${usuariosPesquisa.length} usuários · ${resultadosPesquisa.length} resenhas`}
                 </p>
               </header>
-
-              {resultadosPesquisa.length > 0 ? (
-                <div className="home-lista-resenhas">
-                  {resultadosPesquisa.map((resenha) => (
-                    <CartaoResenha resenha={resenha} key={resenha.id} />
-                  ))}
-                </div>
-              ) : (
+              {carregandoPesquisa && (
                 <div className="home-estado-vazio">
-                  <span className="home-estado-icone" aria-hidden="true">⌕</span>
-                  <h3>Nenhum resultado encontrado</h3>
-                  <p>Tente pesquisar por outro jogo, autor ou palavra.</p>
-                  <button className="home-link-criar" type="button" onClick={abrirPesquisa}>
-                    Nova pesquisa
-                  </button>
+                  <p>Buscando jogos, usuários e resenhas...</p>
                 </div>
               )}
+
+              {erroPesquisa && (
+                <div className="home-estado-vazio">
+                  <h3>Não foi possível realizar a pesquisa</h3>
+                  <p>{erroPesquisa}</p>
+                </div>
+              )}
+              {!carregandoPesquisa && !erroPesquisa && jogosPesquisa.length > 0 && (
+                <section className="home-secao-resultados">
+                  <h2>Jogos</h2>
+
+                  <div className="home-lista-jogos">
+                    {jogosPesquisa.map((jogo) => (
+                      <article className="home-card-jogo" key={jogo.id_jogo}>
+                        {jogo.capa_url && (
+                          <img src={jogo.capa_url} alt={`Capa de ${jogo.nome}`} />
+                        )}
+
+                        <div>
+                          <h3>{jogo.nome}</h3>
+                          <p>
+                            {jogo.nota_media != null
+                              ? `Nota média: ${jogo.nota_media.toFixed(1)}`
+                              : 'Ainda sem avaliações'}
+                          </p>
+                          <span>{jogo.total_reviews} resenhas</span>
+                        </div>
+                      </article>
+                    ))}
+                  </div>
+                </section>
+              )}
+              {!carregandoPesquisa && !erroPesquisa && usuariosPesquisa.length > 0 && (
+                <section className="home-secao-resultados">
+                  <h2>Usuários</h2>
+
+                  <div className="home-lista-usuarios">
+                    {usuariosPesquisa.map((usuario) => (
+                      <article className="home-card-usuario" key={usuario.id_usuario}>
+                        {usuario.avatar_url ? (
+                          <img
+                            src={usuario.avatar_url}
+                            alt={`Foto de ${usuario.username}`}
+                          />
+                        ) : (
+                          <div className="home-avatar-fallback">
+                            {usuario.username.charAt(0).toUpperCase()}
+                          </div>
+                        )}
+
+                        <h3>{usuario.username}</h3>
+                      </article>
+                    ))}
+                  </div>
+                </section>
+              )}
+             {!carregandoPesquisa && !erroPesquisa && resultadosPesquisa.length > 0 && (
+                <section className="home-secao-resultados">
+                  <h2>Resenhas</h2>
+
+                  <div className="home-lista-resenhas">
+                    {resultadosPesquisa.map((resenha) => (
+                      <CartaoResenha resenha={resenha} key={resenha.id} />
+                    ))}
+                  </div>
+                </section>
+              )}
+
+              {!carregandoPesquisa &&
+                !erroPesquisa &&
+                jogosPesquisa.length === 0 &&
+                usuariosPesquisa.length === 0 &&
+                resultadosPesquisa.length === 0 && (
+                  <div className="home-estado-vazio">
+                    <span className="home-estado-icone" aria-hidden="true">⌕</span>
+                    <h3>Nenhum resultado encontrado</h3>
+                    <p>Tente pesquisar por outro jogo, autor ou palavra.</p>
+                    <button className="home-link-criar" type="button" onClick={abrirPesquisa}>
+                      Nova pesquisa
+                    </button>
+                  </div>
+                )}
             </section>
           ) : (
             <>
@@ -246,11 +433,57 @@ function Home({ resenhas, perfil, onCriarResenha, onSair }) {
                           name="jogo"
                           type="search"
                           placeholder="Pesquise o nome do jogo"
+                          value={buscaJogo}
+                          onChange={(e) => {
+                            setBuscaJogo(e.target.value)
+                            setJogoSelecionado(null)
+                            setJogosEncontrados([])
+                            setErroBuscaJogo('')
+                          }}
                           required
                           maxLength={80}
                           aria-describedby="home-jogo-ajuda"
                         />
                       </span>
+                      <button
+                        type="button"
+                        onClick={() => pesquisarJogos(buscaJogo)}
+                        disabled={carregandoJogos || !buscaJogo.trim()}
+                      >
+                        {carregandoJogos ? 'Pesquisando...' : 'Buscar'}
+                      </button>
+                      {erroBuscaJogo && (
+                        <p className="erro-busca-jogo">{erroBuscaJogo}</p>
+                      )}
+
+                      {carregandoJogos && <p>Pesquisando jogos...</p>}
+
+                      {jogosEncontrados.length > 0 && (
+                        <div className="resultados-jogos">
+                          {jogosEncontrados.map((jogo) => (
+                            <button
+                              type="button"
+                              key={jogo.id_jogo}
+                              onClick={() => {
+                                console.log(jogo)
+                                setJogoSelecionado(jogo)
+                                setBuscaJogo(jogo.nome)
+                                setJogosEncontrados([])
+                                setErroBuscaJogo('')
+                              }}
+                            >
+                              {jogo.capa_url && (
+                                <img src={jogo.capa_url} alt="" />
+                              )}
+                              <span>{jogo.nome}</span>
+                            </button>
+                          ))}
+                        </div>
+                      )}
+
+                      {jogoSelecionado && (
+                        <p>Jogo selecionado: {jogoSelecionado.nome}</p>
+                      )}
                       <span className="home-campo-ajuda" id="home-jogo-ajuda">
                         Busque um jogo para associar à sua resenha.
                       </span>
@@ -304,7 +537,13 @@ function Home({ resenhas, perfil, onCriarResenha, onSair }) {
                       >
                         Cancelar
                       </button>
-                      <button className="home-botao-publicar" type="submit">Publicar</button>
+                      <button
+                        className="home-botao-publicar"
+                        type="submit"
+                        disabled={publicando}
+                      >
+                        {publicando ? 'Publicando...' : 'Publicar'}
+                      </button>
                     </div>
                   </form>
                 )}

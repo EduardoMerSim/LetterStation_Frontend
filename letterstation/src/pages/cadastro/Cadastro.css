@@ -211,6 +211,14 @@
   }
 }
 
+.cadastro-checklist{
+  display: flex;
+  justify-content: space-between;
+}
+
+.bloco{
+  width: 50%;
+}
 @media (max-width: 480px) {
   .cadastro-page {
     padding: 18px 14px;
@@ -228,4 +236,27 @@
   .cadastro-header h1 {
     font-size: clamp(24px, 7vw, 28px);
   }
+}
+
+.login-senha-container {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.login-senha-container input {
+  width: 100%;
+  padding-right: 45px;
+}
+
+.login-olho {
+  position: absolute;
+  right: 12px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }

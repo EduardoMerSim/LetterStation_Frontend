@@ -8,7 +8,6 @@ import Login from './pages/login/Login';
 
 import { apiFetch } from './services/api'
 
-const chaveResenhas = 'letterstation-resenhas'
 const chavePerfil = 'letterstation-perfil'
 const perfilInicial = { username: 'username', bio: 'Sua bio aparece aqui.', foto: '' }
 
@@ -34,56 +33,38 @@ function carregarPerfil() {
   }
 }
 
-function carregarResenhas() {
-  try {
-    const resenhasSalvas = JSON.parse(window.localStorage.getItem(chaveResenhas) ?? '[]')
-
-    if (!Array.isArray(resenhasSalvas)) {
-      throw new TypeError('Os dados salvos de resenhas não estão no formato esperado.')
-    }
-
-    const resenhasValidas = resenhasSalvas.filter(
-      (resenha) =>
-        resenha &&
-        typeof resenha.id === 'string' &&
-        typeof resenha.jogo === 'string' &&
-        typeof resenha.titulo === 'string' &&
-        typeof resenha.texto === 'string' &&
-        typeof resenha.autor === 'string' &&
-        typeof resenha.criadaEm === 'string' &&
-        !Number.isNaN(Date.parse(resenha.criadaEm)),
-    )
-
-    if (resenhasValidas.length !== resenhasSalvas.length) {
-      console.error('Algumas resenhas salvas foram ignoradas por estarem incompletas ou inválidas.')
-    }
-
-    return resenhasValidas.map((resenha) => ({
-      ...resenha,
-      avaliacao:
-        Number.isInteger(resenha.avaliacao) && resenha.avaliacao >= 1 && resenha.avaliacao <= 5
-          ? resenha.avaliacao
-          : 0,
-    }))
-  } catch (error) {
-    console.error('Não foi possível carregar as resenhas salvas.', error)
-    return []
-  }
-}
-
 function App() {
   const [pathname, setPathname] = useState(window.location.pathname)
-  const [resenhas, setResenhas] = useState(carregarResenhas)
+  const [resenhas, setResenhas] = useState([])
   const [perfil, setPerfil] = useState(carregarPerfil)
   const [telaAtiva, setTelaAtiva] = useState('login')
+  
+  const rota = pathname.replace(/\/+$/, '') || '/'
+
+ useEffect(() => {
+  const token = sessionStorage.getItem('letterstation-token')
+
+  if (!token && rota !== '/login' && rota !== '/cadastro') {
+    navegar('/login')
+  }
+
+  if (token && rota === '/login') {
+    navegar('/')
+  }
+}, [rota])
 
 useEffect(() => {
   async function carregarPerfilAPI() {
     try {
       const resposta = await apiFetch('/usuarios/me');
 
+      if (resposta.status === 401 || resposta.status === 403) {
+        sairDaConta()
+        return
+      }
+
       if (!resposta.ok) {
-        throw new Error('Não foi possível carregar o perfil.');
+        throw new Error('Não foi possível carregar o perfil.')
       }
 
       const dados = await resposta.json();
@@ -110,6 +91,44 @@ useEffect(() => {
   }
 }, [pathname]);
 
+useEffect(() => {
+  async function carregarResenhasAPI() {
+    try {
+      const resposta = await apiFetch('/feed')
+
+      if (resposta.status === 401 || resposta.status === 403) {
+        sairDaConta()
+        return
+      }
+
+      if (!resposta.ok) {
+        throw new Error('Não foi possível carregar as resenhas.')
+      }
+
+      const dados = await resposta.json()
+
+      const resenhasFormatadas = dados.map((resenha) => ({
+        id: resenha.id_avaliacao,
+        id_jogo: resenha.id_jogo,
+        jogo: resenha.jogo_nome,
+        capa_url: resenha.capa_url,
+        titulo: `Review de ${resenha.username} - ${resenha.jogo_nome}`,
+        texto: resenha.texto,
+        avaliacao: resenha.nota,
+        autor: resenha.username,
+        criadaEm: resenha.data_criacao,
+      }))
+
+      setResenhas(resenhasFormatadas)
+    } catch (error) {
+      console.error('Erro ao carregar resenhas:', error)
+    }
+  }
+
+  if (sessionStorage.getItem('letterstation-token')) {
+    carregarResenhasAPI()
+  }
+}, [pathname])
 
   function navegar(rota) {
     window.history.pushState({}, '', rota)
@@ -123,30 +142,88 @@ useEffect(() => {
     navegar('/login')
   }
 
-  useEffect(() => {
-    try {
-      window.localStorage.setItem(chaveResenhas, JSON.stringify(resenhas))
-    } catch (error) {
-      console.error('Não foi possível salvar as resenhas neste navegador.', error)
-    }
-  }, [resenhas])
+  async function criarResenha(resenha) {
+    const resposta = await apiFetch(`/jogos/${resenha.id_jogo}/reviews`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        nota: resenha.avaliacao,
+        texto: resenha.texto,
+      }),
+    })
 
-  function criarResenha(resenha) {
-    setResenhas((atuais) => [
-      ...atuais,
-      { ...resenha, id: `${Date.now()}-${Math.random().toString(36).slice(2)}` },
-    ])
+    const dados = await resposta.json()
+
+    if (!resposta.ok) {
+      throw new Error(dados.detail || 'Não foi possível publicar a resenha.')
+    }
+
+    const novaResenha = {
+      id: dados.id_avaliacao,
+      id_jogo: dados.id_jogo,
+      jogo: dados.jogo_nome || resenha.jogo,
+      titulo: resenha.titulo,
+      capa_url: resenha.capa_url,
+      texto: dados.texto,
+      avaliacao: dados.nota,
+      autor: dados.username || resenha.autor,
+      criadaEm: dados.data_criacao,
+    }
+
+    setResenhas((atuais) => [...atuais, novaResenha])
   }
 
-  function atualizarResenha(id, atualizacao) {
+  async function atualizarResenha(id, atualizacao) {
+    const resposta = await apiFetch(`/reviews/${id}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        nota: atualizacao.avaliacao,
+        texto: atualizacao.texto,
+      }),
+    })
+
+    const dados = await resposta.json()
+
+    if (!resposta.ok) {
+      throw new Error(dados.detail || 'Não foi possível atualizar a resenha.')
+    }
+
     setResenhas((atuais) =>
       atuais.map((resenha) =>
-        resenha.id === id ? { ...resenha, ...atualizacao, id: resenha.id } : resenha,
+        resenha.id === id
+          ? {
+              ...resenha,
+              texto: dados.texto,
+              avaliacao: dados.nota,
+              criadaEm: dados.data_criacao,
+            }
+          : resenha,
       ),
     )
   }
 
-  function excluirResenha(id) {
+  async function excluirResenha(id) {
+    const resposta = await apiFetch(`/reviews/${id}`, {
+      method: 'DELETE',
+    })
+
+    if (!resposta.ok) {
+      let dados = {}
+
+      try {
+        dados = await resposta.json()
+      } catch (error) {
+        // A resposta pode não conter JSON.
+      }
+
+      throw new Error(dados.detail || 'Não foi possível excluir a resenha.')
+    }
+
     setResenhas((atuais) => atuais.filter((resenha) => resenha.id !== id))
   }
 
@@ -195,7 +272,6 @@ useEffect(() => {
     setPerfil(perfilAtualizado)
   }
 
-  const rota = pathname.replace(/\/+$/, '') || '/'
 
   if (rota === '/cadastro') {
     return <Cadastro />

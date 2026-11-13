@@ -7,41 +7,6 @@ function EditarPerfil({ perfil, onSalvar, onCancelar }) {
   const [bio, setBio] = useState(perfil.bio)
   const [foto, setFoto] = useState(perfil.foto)
   const [erro, setErro] = useState('')
-
-  // Valida o formato e o tamanho antes de carregar a imagem para a prévia.
-  /*function handleFotoChange(event) {
-    const arquivo = event.target.files?.[0]
-    event.target.value = ''
-
-    if (!arquivo) {
-      return
-    }
-
-    if (!['image/jpeg', 'image/png', 'image/webp', 'image/gif'].includes(arquivo.type)) {
-      setErro('Escolha uma imagem JPG, PNG, WebP ou GIF.')
-      return
-    }
-
-    if (arquivo.size > 1024 * 1024) {
-      setErro('A imagem deve ter no máximo 1 MB.')
-      return
-    }
-
-    const leitor = new FileReader()
-    leitor.onload = () => {
-      if (typeof leitor.result === 'string') {
-        setFoto(leitor.result)
-        setErro('')
-      } else {
-        setErro('Não foi possível carregar essa imagem. Tente outro arquivo.')
-      }
-    }
-    leitor.onerror = () => {
-      setErro('Não foi possível carregar essa imagem. Tente outro arquivo.')
-    }
-    leitor.readAsDataURL(arquivo)
-  }*/
-
   // Envia as alterações para o componente pai, que cuida de persistir os dados.
   async function handleSubmit(event) {
     event.preventDefault()
@@ -187,8 +152,10 @@ function EditarResenha({ resenha, onSalvar, onCancelar }) {
   const [jogo, setJogo] = useState(resenha.jogo)
   const [texto, setTexto] = useState(resenha.texto)
   const [avaliacao, setAvaliacao] = useState(resenha.avaliacao)
+  const [erro, setErro] = useState('')
+  const [salvando, setSalvando] = useState(false)
 
-  function handleSubmit(event) {
+  async function handleSubmit(event) {
     event.preventDefault()
     const jogoLimpo = jogo.trim()
     const textoLimpo = texto.trim()
@@ -288,14 +255,18 @@ function EditarResenha({ resenha, onSalvar, onCancelar }) {
               {avaliacao ? `${avaliacao} de 5 estrelas` : 'Selecione de 1 a 5 estrelas'}
             </span>
           </fieldset>
-
+              {erro && (
+                <p className="perfil-formulario-erro" role="alert">
+                  {erro}
+                </p>
+              )}
           {/* Descarta a edição ou envia os novos dados ao componente pai. */}
           <div className="perfil-dialog-acoes">
             <button className="perfil-botao-cancelar" type="button" onClick={onCancelar}>
               Cancelar
             </button>
-            <button className="perfil-botao-salvar" type="submit">
-              Salvar alterações
+            <button type="submit" disabled={salvando}>
+              {salvando ? 'Salvando...' : 'Salvar'}
             </button>
           </div>
         </form>
@@ -309,7 +280,23 @@ function Perfil({ resenhas, perfil, onAtualizarPerfil, onAtualizarResenha, onExc
   const [resenhaEmEdicao, setResenhaEmEdicao] = useState(null)
   const [resenhaParaExcluir, setResenhaParaExcluir] = useState(null)
   const [editarPerfilAberto, setEditarPerfilAberto] = useState(false)
+  const [erroExclusao, setErroExclusao] = useState('')
+  const [excluindo, setExcluindo] = useState(false)
   const minhasResenhas = resenhas.filter((resenha) => resenha.autor === perfil.username)
+
+  async function confirmarExclusao() {
+    setExcluindo(true)
+    setErroExclusao('')
+
+    try {
+      await onExcluirResenha(resenhaParaExcluir.id)
+      setResenhaParaExcluir(null)
+    } catch (error) {
+      setErroExclusao(error.message)
+    } finally {
+      setExcluindo(false)
+    }
+  }
 
   return (
     <div className="perfil-page">
@@ -444,8 +431,8 @@ function Perfil({ resenhas, perfil, onAtualizarPerfil, onAtualizarResenha, onExc
         <EditarResenha
           key={resenhaEmEdicao.id}
           resenha={resenhaEmEdicao}
-          onSalvar={(atualizacao) => {
-            onAtualizarResenha(resenhaEmEdicao.id, atualizacao)
+          onSalvar={async (atualizacao) => {
+            await onAtualizarResenha(resenhaEmEdicao.id, atualizacao)
             setResenhaEmEdicao(null)
           }}
           onCancelar={() => setResenhaEmEdicao(null)}
@@ -469,6 +456,11 @@ function Perfil({ resenhas, perfil, onAtualizarPerfil, onAtualizarResenha, onExc
                 Essa ação não poderá ser desfeita.
               </p>
             </div>
+            {erroExclusao && (
+              <p className="perfil-formulario-erro" role="alert">
+                {erroExclusao}
+              </p>
+            )}
             <div className="perfil-dialog-acoes">
               <button
                 className="perfil-botao-cancelar"
@@ -480,12 +472,10 @@ function Perfil({ resenhas, perfil, onAtualizarPerfil, onAtualizarResenha, onExc
               <button
                 className="perfil-botao-excluir"
                 type="button"
-                onClick={() => {
-                  onExcluirResenha(resenhaParaExcluir.id)
-                  setResenhaParaExcluir(null)
-                }}
+                onClick={confirmarExclusao}
+                disabled={excluindo}
               >
-                Excluir resenha
+                {excluindo ? 'Excluindo...' : 'Excluir resenha'}
               </button>
             </div>
           </section>
