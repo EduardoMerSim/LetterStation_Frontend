@@ -9,7 +9,7 @@ function EditarPerfil({ perfil, onSalvar, onCancelar }) {
   const [erro, setErro] = useState('')
 
   // Valida o formato e o tamanho antes de carregar a imagem para a prévia.
-  function handleFotoChange(event) {
+  /*function handleFotoChange(event) {
     const arquivo = event.target.files?.[0]
     event.target.value = ''
 
@@ -40,7 +40,7 @@ function EditarPerfil({ perfil, onSalvar, onCancelar }) {
       setErro('Não foi possível carregar essa imagem. Tente outro arquivo.')
     }
     leitor.readAsDataURL(arquivo)
-  }
+  }*/
 
   // Envia as alterações para o componente pai, que cuida de persistir os dados.
   async function handleSubmit(event) {
@@ -96,21 +96,32 @@ function EditarPerfil({ perfil, onSalvar, onCancelar }) {
           {/* Prévia da foto, seletor de arquivo e opção de removê-la. */}
           <div className="perfil-foto-editor">
             {foto ? (
-              <img className="perfil-foto-preview" src={foto} alt="Prévia da foto de perfil" />
+              <img
+                className="perfil-foto-preview"
+                src={foto}
+                alt="Prévia da foto de perfil"
+                onError={() => setErro('Não foi possível carregar essa imagem. Verifique o link.')}
+              />
             ) : (
-              <span className="perfil-foto-preview perfil-foto-inicial" aria-hidden="true">
+              <span className="perfil-foto-preview perfil-foto-inicial">
                 {username.trim().charAt(0).toUpperCase() || 'U'}
               </span>
             )}
+
             <div className="perfil-foto-acoes">
-              <label className="perfil-foto-escolher">
+              <label className="perfil-campo">
+                <span>Link da foto</span>
                 <input
-                  type="file"
-                  accept="image/jpeg,image/png,image/webp,image/gif"
-                  onChange={handleFotoChange}
+                  type="url"
+                  value={foto}
+                  onChange={(event) => {
+                    setFoto(event.target.value)
+                    setErro('')
+                  }}
+                  placeholder="https://exemplo.com/imagem.jpg"
                 />
-                Escolher foto
               </label>
+
               {foto && (
                 <button
                   className="perfil-foto-remover"
@@ -123,7 +134,8 @@ function EditarPerfil({ perfil, onSalvar, onCancelar }) {
                   Remover foto
                 </button>
               )}
-              <span>JPG, PNG, WebP ou GIF · até 1 MB</span>
+
+              <span>Cole o link direto de uma imagem.</span>
             </div>
           </div>
 

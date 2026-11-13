@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import './Cadastro.css'
 
-const TAMANHO_MINIMO = 6
+const TAMANHO_MINIMO = 8
 
 function Cadastro({ onAlternarTela }) {
   const [nome, setNome] = useState('')
@@ -9,6 +9,7 @@ function Cadastro({ onAlternarTela }) {
   const [email, setEmail] = useState('')
   const [senha, setSenha] = useState('')
   const [mensagem, setMensagem] = useState('')
+  const [carregando, setCarregando] = useState(false)
 
   // Regras de senha
   const regras = {
@@ -25,7 +26,7 @@ function Cadastro({ onAlternarTela }) {
     onAlternarTela?.('login')
   }
 
-  function handleSubmit(event) {
+  async function handleSubmit(event) {
     event.preventDefault()
 
     if (!senhaValida) {
@@ -33,11 +34,43 @@ function Cadastro({ onAlternarTela }) {
       return
     }
 
-    // Aqui entra a chamada à API de cadastro
-    console.log('Cadastro realizado:', { nome, username, email })
+    setCarregando(true)
+    setMensagem('')
 
-    setMensagem(`Conta criada com sucesso para: ${nome}`)
-    setTimeout(() => onAlternarTela?.('login'), 1500)
+    try {
+      const resposta = await fetch(`${import.meta.env.VITE_API_URL}/usuarios`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          username: username.trim(),
+          email: email.trim(),
+          senha,
+        }),
+      })
+
+      const dados = await resposta.json()
+
+      if (!resposta.ok) {
+        const detalhe = Array.isArray(dados.detail)
+          ? dados.detail.map((erro) => erro.msg).join(', ')
+          : dados.detail
+
+        throw new Error(detalhe || 'Não foi possível criar a conta.')
+      }
+
+      setMensagem('Conta criada com sucesso! Redirecionando para o login...')
+
+      setTimeout(() => {
+        onAlternarTela?.('login')
+      }, 1500)
+
+    } catch (error) {
+      setMensagem(error.message || 'Erro ao realizar cadastro.')
+    } finally {
+      setCarregando(false)
+    }
   }
 
   return (
@@ -128,9 +161,9 @@ function Cadastro({ onAlternarTela }) {
           <button
             className="cadastro-botao"
             type="submit"
-            disabled={!senhaValida}
-          >
-            Cadastrar
+            disabled={!senhaValida || carregando}
+            >
+              {carregando ? 'Cadastrando...' : 'Cadastrar'}
           </button>
 
           <p className="cadastro-mensagem" role="status" aria-live="polite">

@@ -6,6 +6,7 @@ export default function Login({ onAlternarTela, onEntrar }) {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [erro, setErro] = useState('')
+  const [mostrarSenha, setMostrarSenha] = useState(false)
 
   async function handleSubmit(event) {
     event.preventDefault()
@@ -66,15 +67,27 @@ export default function Login({ onAlternarTela, onEntrar }) {
 
           <label className="login-campo">
             <span>Senha</span>
-            <input
-              type="password"
-              name="password"
-              autoComplete="current-password"
-              value={password}
-              onChange={(event) => setPassword(event.target.value)}
-              placeholder="Digite sua senha"
-              required
-            />
+
+            <div className="login-senha-container">
+              <input
+                type={mostrarSenha ? 'text' : 'password'}
+                name="password"
+                autoComplete="current-password"
+                value={password}
+                onChange={(event) => setPassword(event.target.value)}
+                placeholder="Digite sua senha"
+                required
+              />
+
+              <button
+                type="button"
+                className="login-olho"
+                onClick={() => setMostrarSenha(!mostrarSenha)}
+                aria-label={mostrarSenha ? 'Ocultar senha' : 'Mostrar senha'}
+              >
+                {mostrarSenha ? '🙈' : '👁️'}
+              </button>
+            </div>
           </label>
           {erro && <p className="login-erro">{erro}</p>}
           <button type="submit" className="login-btn">Entrar</button>

@@ -26,10 +26,7 @@ function carregarPerfil() {
           ? perfilSalvo.username.trim()
           : perfilInicial.username,
       bio: typeof perfilSalvo.bio === 'string' ? perfilSalvo.bio : perfilInicial.bio,
-      foto:
-        typeof perfilSalvo.foto === 'string' && perfilSalvo.foto.startsWith('data:image/')
-          ? perfilSalvo.foto
-          : '',
+      foto: typeof perfilSalvo.foto === 'string' ? perfilSalvo.foto : '',
     }
   } catch (error) {
     console.error('Não foi possível carregar o perfil salvo.', error)
@@ -80,7 +77,6 @@ function App() {
   const [perfil, setPerfil] = useState(carregarPerfil)
   const [telaAtiva, setTelaAtiva] = useState('login')
 
-  
 useEffect(() => {
   async function carregarPerfilAPI() {
     try {
@@ -120,6 +116,13 @@ useEffect(() => {
     setPathname(rota)
   }
 
+  function sairDaConta() {
+    window.sessionStorage.removeItem('letterstation-token')
+    setPerfil(perfilInicial)
+    setTelaAtiva('login')
+    navegar('/login')
+  }
+
   useEffect(() => {
     try {
       window.localStorage.setItem(chaveResenhas, JSON.stringify(resenhas))
@@ -156,6 +159,7 @@ useEffect(() => {
       body: JSON.stringify({
         username: atualizacao.username,
         biografia: atualizacao.bio,
+        avatar_url: atualizacao.foto,
       }),
     })
 
@@ -228,8 +232,8 @@ useEffect(() => {
       resenhas={resenhas}
       perfil={perfil}
       onCriarResenha={criarResenha}
-      onSair={() => navegar('/login')}
-    />
+      onSair={sairDaConta}
+    /> 
   )
 }
 

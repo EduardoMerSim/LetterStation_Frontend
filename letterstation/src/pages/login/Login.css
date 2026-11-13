@@ -154,6 +154,27 @@
   text-decoration: underline;
 }
 
+.login-senha-container {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.login-senha-container input {
+  width: 100%;
+  padding-right: 45px;
+}
+
+.login-olho {
+  position: absolute;
+  right: 12px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 18px;
+  padding: 5px;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .login-campo input,
   .login-btn {
