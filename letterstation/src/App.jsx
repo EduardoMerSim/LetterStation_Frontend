@@ -6,6 +6,8 @@ import './App.css'
 import React from 'react';
 import Login from './pages/login/Login';
 
+import { apiFetch } from './services/api'
+
 const chaveResenhas = 'letterstation-resenhas'
 const chavePerfil = 'letterstation-perfil'
 const perfilInicial = { username: 'username', bio: 'Sua bio aparece aqui.', foto: '' }
@@ -78,14 +80,40 @@ function App() {
   const [perfil, setPerfil] = useState(carregarPerfil)
   const [telaAtiva, setTelaAtiva] = useState('login')
 
-  useEffect(() => {
-    function handlePopState() {
-      setPathname(window.location.pathname)
-    }
+  
+useEffect(() => {
+  async function carregarPerfilAPI() {
+    try {
+      const resposta = await apiFetch('/usuarios/me');
 
-    window.addEventListener('popstate', handlePopState)
-    return () => window.removeEventListener('popstate', handlePopState)
-  }, [])
+      if (!resposta.ok) {
+        throw new Error('Não foi possível carregar o perfil.');
+      }
+
+      const dados = await resposta.json();
+
+      setPerfil({
+        username: dados.username,
+        bio: dados.biografia || '',
+        foto: dados.avatar_url || '',
+        email: dados.email,
+        id_usuario: dados.id_usuario,
+        total_reviews: dados.total_reviews,
+        total_seguidores: dados.total_seguidores,
+        total_seguindo: dados.total_seguindo,
+        data_cadastro: dados.data_cadastro,
+      });
+
+    } catch (error) {
+      console.error('Erro ao carregar perfil:', error);
+    }
+  }
+
+  if (sessionStorage.getItem('letterstation-token')) {
+    carregarPerfilAPI();
+  }
+}, [pathname]);
+
 
   function navegar(rota) {
     window.history.pushState({}, '', rota)
@@ -119,14 +147,35 @@ function App() {
     setResenhas((atuais) => atuais.filter((resenha) => resenha.id !== id))
   }
 
-  function atualizarPerfil(atualizacao) {
-    const perfilAtualizado = { ...perfil, ...atualizacao }
+  async function atualizarPerfil(atualizacao) {
+    const resposta = await apiFetch('/usuarios/me', {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        username: atualizacao.username,
+        biografia: atualizacao.bio,
+      }),
+    })
 
-    try {
-      window.localStorage.setItem(chavePerfil, JSON.stringify(perfilAtualizado))
-    } catch (error) {
-      console.error('Não foi possível salvar as alterações do perfil.', error)
-      throw new Error('Não foi possível salvar as alterações. Tente novamente ou escolha uma foto menor.')
+    const dados = await resposta.json()
+
+    if (!resposta.ok) {
+      throw new Error(dados.detail || 'Não foi possível atualizar o perfil.')
+    }
+
+    const perfilAtualizado = {
+      ...perfil,
+      username: dados.username,
+      bio: dados.biografia || '',
+      foto: dados.avatar_url || '',
+      email: dados.email,
+      id_usuario: dados.id_usuario,
+      total_reviews: dados.total_reviews,
+      total_seguidores: dados.total_seguidores,
+      total_seguindo: dados.total_seguindo,
+      data_cadastro: dados.data_cadastro,
     }
 
     if (perfilAtualizado.username !== perfil.username) {
@@ -163,7 +212,11 @@ function App() {
     return (
     <>
       {telaAtiva === 'login' ? (
-        <Login onAlternarTela={setTelaAtiva} onEntrar={() => navegar('/')} />
+        <Login onAlternarTela={setTelaAtiva} onEntrar={
+          (token) => {
+            window.sessionStorage.setItem('letterstation-token', token)
+            navegar('/')
+          }} />
       ) : (
         <Cadastro onAlternarTela={setTelaAtiva} />
       )}

@@ -1,13 +1,38 @@
 import { useState } from 'react'
 import './Login.css'
+import API_URL from '../../services/api'
 
 export default function Login({ onAlternarTela, onEntrar }) {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [erro, setErro] = useState('')
 
-  function handleSubmit(event) {
+  async function handleSubmit(event) {
     event.preventDefault()
-    onEntrar()
+    setErro('')
+
+    try {
+      const resposta = await fetch(`${API_URL}/login`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email: email,
+          senha: password,
+        }),
+      })
+
+      const dados = await resposta.json()
+
+      if (!resposta.ok) {
+        throw new Error(dados.detail || 'Não foi possível realizar o login.')
+      }
+
+      onEntrar(dados.token)
+    } catch (error) {
+      setErro(error.message || 'Erro ao conectar com o servidor.')
+    }
   }
 
   return (
@@ -51,7 +76,7 @@ export default function Login({ onAlternarTela, onEntrar }) {
               required
             />
           </label>
-
+          {erro && <p className="login-erro">{erro}</p>}
           <button type="submit" className="login-btn">Entrar</button>
         </form>
 

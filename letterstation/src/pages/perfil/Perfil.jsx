@@ -43,7 +43,7 @@ function EditarPerfil({ perfil, onSalvar, onCancelar }) {
   }
 
   // Envia as alterações para o componente pai, que cuida de persistir os dados.
-  function handleSubmit(event) {
+  async function handleSubmit(event) {
     event.preventDefault()
     const usernameLimpo = username.trim()
 
@@ -55,7 +55,7 @@ function EditarPerfil({ perfil, onSalvar, onCancelar }) {
     }
 
     try {
-      onSalvar({ username: usernameLimpo, bio: bio.trim(), foto })
+      await onSalvar({ username: usernameLimpo, bio: bio.trim(), foto })
     } catch (error) {
       setErro(error.message)
     }
@@ -344,7 +344,7 @@ function Perfil({ resenhas, perfil, onAtualizarPerfil, onAtualizarResenha, onExc
               <p className="perfil-bio">{perfil.bio || 'Nenhuma biografia adicionada.'}</p>
             </div>
             <span className="perfil-seguidores">
-              0 seguidores
+              {perfil.total_seguidores ?? 0} seguidores
             </span>
           </section>
 
@@ -419,8 +419,8 @@ function Perfil({ resenhas, perfil, onAtualizarPerfil, onAtualizarResenha, onExc
         <EditarPerfil
           key={perfil.username}
           perfil={perfil}
-          onSalvar={(atualizacao) => {
-            onAtualizarPerfil(atualizacao)
+          onSalvar={async (atualizacao) => {
+            await onAtualizarPerfil(atualizacao)
             setEditarPerfilAberto(false)
           }}
           onCancelar={() => setEditarPerfilAberto(false)}
