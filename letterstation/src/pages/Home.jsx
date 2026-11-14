@@ -35,7 +35,7 @@ function CartaoResenha({ resenha }) {
 
         <p className="home-resenha-texto">{resenha.texto}</p>
 
-        <a className="home-autor" href={`/usuario/${encodeURIComponent(resenha.autor)}`}>
+        <a className="home-autor" href={`/usuario/${resenha.id_usuario}`}>
           <span className="home-avatar home-avatar-pequeno" aria-hidden="true">
             {resenha.autor.charAt(0).toUpperCase()}
           </span>
@@ -342,7 +342,14 @@ function Home({ resenhas, perfil, onCriarResenha, onSair }) {
 
                   <div className="home-lista-usuarios">
                     {usuariosPesquisa.map((usuario) => (
-                      <article className="home-card-usuario" key={usuario.id_usuario}>
+                        <button
+                          className="home-card-usuario"
+                          type="button"
+                          key={usuario.id_usuario}
+                          onClick={() => {
+                            window.location.href = `/usuario/${usuario.id_usuario}`
+                          }}
+                        >
                         {usuario.avatar_url ? (
                           <img
                             src={usuario.avatar_url}
@@ -355,7 +362,7 @@ function Home({ resenhas, perfil, onCriarResenha, onSair }) {
                         )}
 
                         <h3>{usuario.username}</h3>
-                      </article>
+                      </button>
                     ))}
                   </div>
                 </section>

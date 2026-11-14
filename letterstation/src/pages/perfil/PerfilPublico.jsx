@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import './Perfil.css'
 import './PerfilPublico.css'
 
@@ -9,7 +9,13 @@ function PerfilPublico({
   seguindoInicial = false,
   onAlternarSeguir,
 }) {
+  const ehMeuPerfil = usuario?.id_usuario === perfilAtual?.id_usuario
   const [seguindo, setSeguindo] = useState(seguindoInicial)
+  const [erroSeguir, setErroSeguir] = useState('')
+
+  useEffect(() => {
+    setSeguindo(seguindoInicial)
+  }, [seguindoInicial, usuario?.id_usuario])
 
   if (!usuario) {
     return (
@@ -39,13 +45,20 @@ function PerfilPublico({
         .replace('.', ',')
     : '—'
 
-  const seguidoresBase = usuario.seguidores ?? 0
-  const totalSeguidores = seguidoresBase + (seguindo ? 1 : 0)
+  const totalSeguidores = usuario.seguidores ?? 0
 
-  function alternarSeguir() {
+  async function alternarSeguir() {
     const proximo = !seguindo
-    setSeguindo(proximo)
-    onAlternarSeguir?.(usuario.username, proximo)
+
+    try {
+      setErroSeguir('')
+
+      await onAlternarSeguir(usuario.id_usuario, proximo)
+
+      setSeguindo(proximo)
+    } catch (erro) {
+      setErroSeguir(erro.message || 'Não foi possível atualizar o relacionamento.')
+    }
   }
 
   return (
@@ -86,14 +99,17 @@ function PerfilPublico({
             </div>
 
             <div className="pp-acoes">
-              <button
-                className={seguindo ? 'pp-seguir pp-seguir-ativo' : 'pp-seguir'}
-                type="button"
-                aria-pressed={seguindo}
-                onClick={alternarSeguir}
-              >
-                {seguindo ? 'Seguindo' : 'Seguir'}
-              </button>
+              {!ehMeuPerfil && (
+                <button
+                  className={seguindo ? 'pp-seguir pp-seguir-ativo' : 'pp-seguir'}
+                  type="button"
+                  aria-pressed={seguindo}
+                  onClick={alternarSeguir}
+                >
+                  {seguindo ? 'Deixar de seguir' : 'Seguir'}
+                </button>
+              )}
+              {erroSeguir && <p role="alert">{erroSeguir}</p>}
 
               <dl className="pp-estatisticas">
                 <div>
