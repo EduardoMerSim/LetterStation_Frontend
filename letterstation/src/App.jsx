@@ -310,6 +310,28 @@ useEffect(() => {
     setResenhas((atuais) => atuais.filter((resenha) => resenha.id !== id))
   }
 
+  async function excluirMeuPerfil() {
+    const resposta = await apiFetch('/usuarios/me', {
+      method: 'DELETE',
+    })
+
+    if (!resposta.ok) {
+      let dados = {}
+
+      try {
+        dados = await resposta.json()
+      } catch (error) {
+        // A resposta pode não conter JSON.
+      }
+
+      throw new Error(dados.detail || 'Não foi possível excluir o perfil.')
+    }
+
+    setResenhas([])
+    window.localStorage.removeItem(chavePerfil)
+    sairDaConta()
+  }
+
   async function alternarSeguirUsuario(idUsuario, seguir) {
     const resposta = await apiFetch(
       `/usuarios/${idUsuario}/seguir`,
@@ -413,6 +435,7 @@ useEffect(() => {
         onAtualizarResenha={atualizarResenha}
         onExcluirResenha={excluirResenha}
         onAtualizarPerfil={atualizarPerfil}
+        onExcluirPerfil={excluirMeuPerfil}
       />
     )
   }

@@ -275,13 +275,17 @@ function EditarResenha({ resenha, onSalvar, onCancelar }) {
   )
 }
 
-function Perfil({ resenhas, perfil, onAtualizarPerfil, onAtualizarResenha, onExcluirResenha }) {
+function Perfil({resenhas, perfil, onAtualizarPerfil, onAtualizarResenha, onExcluirResenha, onExcluirPerfil,}) {
   // Controla qual diálogo está aberto e separa as resenhas deste usuário.
   const [resenhaEmEdicao, setResenhaEmEdicao] = useState(null)
   const [resenhaParaExcluir, setResenhaParaExcluir] = useState(null)
   const [editarPerfilAberto, setEditarPerfilAberto] = useState(false)
   const [erroExclusao, setErroExclusao] = useState('')
   const [excluindo, setExcluindo] = useState(false)
+  const [confirmarExclusaoPerfil, setConfirmarExclusaoPerfil] = useState(false)
+  const [erroExclusaoPerfil, setErroExclusaoPerfil] = useState('')
+  const [excluindoPerfil, setExcluindoPerfil] = useState(false)
+  const [menuConfiguracoesAberto, setMenuConfiguracoesAberto] = useState(false)
   const minhasResenhas = resenhas.filter((resenha) => resenha.autor === perfil.username)
 
   async function confirmarExclusao() {
@@ -295,6 +299,18 @@ function Perfil({ resenhas, perfil, onAtualizarPerfil, onAtualizarResenha, onExc
       setErroExclusao(error.message)
     } finally {
       setExcluindo(false)
+    }
+  }
+  async function confirmarExclusaoConta() {
+    setExcluindoPerfil(true)
+    setErroExclusaoPerfil('')
+
+    try {
+      await onExcluirPerfil()
+    } catch (error) {
+      setErroExclusaoPerfil(error.message || 'Não foi possível excluir o perfil.')
+    } finally {
+      setExcluindoPerfil(false)
     }
   }
 
@@ -319,14 +335,43 @@ function Perfil({ resenhas, perfil, onAtualizarPerfil, onAtualizarResenha, onExc
 
       <main className="perfil-main">
         {/* Abre o formulário para editar foto, username e biografia. */}
+       <div className="perfil-configuracoes-container">
         <button
           className="perfil-configuracoes"
           type="button"
-          aria-label="Editar perfil"
-          onClick={() => setEditarPerfilAberto(true)}
+          aria-label="Configurações do perfil"
+          aria-expanded={menuConfiguracoesAberto}
+          onClick={() => setMenuConfiguracoesAberto((aberto) => !aberto)}
         >
           <span aria-hidden="true">⚙</span>
         </button>
+
+        {menuConfiguracoesAberto && (
+          <div className="perfil-menu-configuracoes">
+            <button
+              type="button"
+              onClick={() => {
+                setMenuConfiguracoesAberto(false)
+                setEditarPerfilAberto(true)
+              }}
+            >
+              Editar perfil
+            </button>
+
+            <button
+              className="perfil-menu-excluir"
+              type="button"
+              onClick={() => {
+                setMenuConfiguracoesAberto(false)
+                setErroExclusaoPerfil('')
+                setConfirmarExclusaoPerfil(true)
+              }}
+            >
+              Excluir perfil
+            </button>
+          </div>
+        )}
+      </div>
 
         <div className="perfil-conteudo">
           {/* Informações do usuário e foto ou inicial usada como avatar. */}
@@ -476,6 +521,53 @@ function Perfil({ resenhas, perfil, onAtualizarPerfil, onAtualizarResenha, onExc
                 disabled={excluindo}
               >
                 {excluindo ? 'Excluindo...' : 'Excluir resenha'}
+              </button>
+            </div>
+          </section>
+        </div>
+      )}
+      {confirmarExclusaoPerfil && (
+        <div className="perfil-dialog-fundo">
+          <section
+            className="perfil-dialog perfil-dialog-confirmacao"
+            role="alertdialog"
+            aria-modal="true"
+            aria-labelledby="perfil-excluir-conta-titulo"
+            aria-describedby="perfil-excluir-conta-descricao"
+          >
+            <div className="perfil-dialog-corpo">
+              <h2 id="perfil-excluir-conta-titulo">Excluir perfil?</h2>
+
+              <p id="perfil-excluir-conta-descricao">
+                Tem certeza que deseja excluir sua conta? Suas resenhas e seus
+                vínculos de seguidores também serão excluídos. Essa ação não
+                poderá ser desfeita.
+              </p>
+            </div>
+
+            {erroExclusaoPerfil && (
+              <p className="perfil-formulario-erro" role="alert">
+                {erroExclusaoPerfil}
+              </p>
+            )}
+
+            <div className="perfil-dialog-acoes">
+              <button
+                className="perfil-botao-cancelar"
+                type="button"
+                onClick={() => setConfirmarExclusaoPerfil(false)}
+                disabled={excluindoPerfil}
+              >
+                Cancelar
+              </button>
+
+              <button
+                className="perfil-botao-excluir"
+                type="button"
+                onClick={confirmarExclusaoConta}
+                disabled={excluindoPerfil}
+              >
+                {excluindoPerfil ? 'Excluindo...' : 'Excluir perfil'}
               </button>
             </div>
           </section>

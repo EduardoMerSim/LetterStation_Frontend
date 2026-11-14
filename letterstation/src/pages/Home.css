@@ -706,6 +706,21 @@
   .home-resenha {
     padding: 18px;
   }
+  .home-jogo-detalhe {
+    gap: 12px;
+    padding: 14px;
+  }
+
+  .home-jogo-detalhe img {
+    width: 105px;
+    height: 100px;
+    flex-basis: 105px;
+  }
+
+  .home-jogo-detalhe .home-titulo {
+    font-size: 21px;
+    overflow-wrap: anywhere;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -865,13 +880,15 @@
   margin: 10px 0;
 }
 .home-resenha-capa {
-  width: 180px;
-  height: 110px;
-  object-fit: contain;
+  display: block;
+  width: 220px;
+  height: 138px;
+  flex: 0 0 220px;
+  object-fit: cover;
   object-position: center;
-  border-radius: 8px;
-  flex-shrink: 0;
+  border-radius: 10px;
   align-self: center;
+  box-shadow: 0 4px 12px rgba(34, 30, 66, 0.10);
 }
 
 /* Seções dos resultados da pesquisa */
@@ -1026,4 +1043,34 @@
     height: 36px;
     flex-basis: 36px;
   }
+}
+/* Tela de resenhas de um jogo */
+.home-jogo-detalhe {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  margin-bottom: 28px;
+  padding: 22px;
+  border: 1px solid #e9e8f0;
+  border-radius: 14px;
+  background: #fff;
+  box-shadow: 0 8px 24px rgba(34, 30, 66, 0.04);
+}
+
+.home-jogo-detalhe img {
+  display: block;
+  width: 220px;
+  height: 124px;
+  flex: 0 0 220px;
+  border: 1px solid #e9e8f0;
+  border-radius: 10px;
+  object-fit: cover;
+  box-shadow: 0 5px 14px rgba(34, 30, 66, 0.12);
+}
+
+.home-jogo-detalhe .home-header {
+  flex: 1;
+  min-width: 0;
+  margin-bottom: 0;
 }

@@ -70,6 +70,12 @@ function Home({ resenhas, perfil, onCriarResenha, onSair }) {
   const [carregandoPesquisa, setCarregandoPesquisa] = useState(false)
   const [erroPesquisa, setErroPesquisa] = useState('')
 
+  // Estado da tela de resenhas de um jogo específico.
+  const [jogoAberto, setJogoAberto] = useState(null)
+  const [resenhasDoJogo, setResenhasDoJogo] = useState([])
+  const [carregandoResenhasJogo, setCarregandoResenhasJogo] = useState(false)
+  const [erroResenhasJogo, setErroResenhasJogo] = useState('')
+
   //busca e exibição do feed
   const [buscaJogo, setBuscaJogo] = useState('')
   const [jogosEncontrados, setJogosEncontrados] = useState([])
@@ -138,6 +144,29 @@ function Home({ resenhas, perfil, onCriarResenha, onSair }) {
     setMostrandoResultados(false)
     setTermoPesquisa('')
     setRascunhoPesquisa('')
+  }
+  async function abrirJogo(jogo) {
+    setJogoAberto(jogo)
+    setResenhasDoJogo([])
+    setErroResenhasJogo('')
+    setCarregandoResenhasJogo(true)
+
+    try {
+      const resposta = await apiFetch(
+        `/jogos/${jogo.id_jogo}/reviews`
+      )
+
+      if (!resposta.ok) {
+        throw new Error('Não foi possível carregar as resenhas deste jogo.')
+      }
+
+      const dados = await resposta.json()
+      setResenhasDoJogo(dados)
+    } catch (erro) {
+      setErroResenhasJogo(erro.message)
+    } finally {
+      setCarregandoResenhasJogo(false)
+    }
   }
   async function pesquisarJogos(termo) {
     if (!termo.trim()) {
@@ -282,7 +311,74 @@ function Home({ resenhas, perfil, onCriarResenha, onSair }) {
 
       <main className="home-main">
         <div className="home-conteudo">
-          {mostrandoResultados ? (
+          {jogoAberto ? (
+            <section className="home-resultados" aria-labelledby="home-jogo-titulo">
+              <button
+                className="home-voltar"
+                type="button"
+                onClick={() => setJogoAberto(null)}
+              >
+                ← Voltar aos resultados
+              </button>
+              <div className="home-jogo-detalhe">
+                <header className="home-header">
+                  <p className="home-eyebrow">JOGO</p>
+                  <h1 className="home-titulo" id="home-jogo-titulo">
+                    {jogoAberto.nome}
+                  </h1>
+                  <p className="home-subtitulo">
+                    {resenhasDoJogo.length} resenhas da comunidade
+                  </p>
+                </header>
+
+                {jogoAberto.capa_url && (
+                  <img
+                    src={jogoAberto.capa_url}
+                    alt={`Capa de ${jogoAberto.nome}`}
+                  />
+                )}
+              </div>
+
+              {carregandoResenhasJogo && (
+                <div className="home-estado-vazio">
+                  <p>Carregando resenhas...</p>
+                </div>
+              )}
+
+              {erroResenhasJogo && (
+                <div className="home-estado-vazio">
+                  <h3>Não foi possível carregar as resenhas</h3>
+                  <p>{erroResenhasJogo}</p>
+                </div>
+              )}
+
+              {!carregandoResenhasJogo &&
+                !erroResenhasJogo &&
+                (resenhasDoJogo.length > 0 ? (
+                  <div className="home-lista-resenhas">
+                    {resenhasDoJogo.map((resenha) => (
+                      <CartaoResenha
+                        key={resenha.id_avaliacao}
+                        resenha={{
+                          ...resenha,
+                          id: resenha.id_avaliacao,
+                          jogo: resenha.jogo_nome,
+                          criadaEm: resenha.data_criacao,
+                          titulo: `Review de ${resenha.username} - ${resenha.jogo_nome}`,
+                          avaliacao: Math.round(resenha.nota),
+                          autor: resenha.username,
+                        }}
+                      />
+                    ))}
+                  </div>
+                ) : (
+                  <div className="home-estado-vazio">
+                    <h3>Ainda não há resenhas para este jogo</h3>
+                    <p>Que tal ser a primeira pessoa a compartilhar sua opinião?</p>
+                  </div>
+                ))}
+            </section>
+          ) : mostrandoResultados ? (
             /* Tela de resultados da pesquisa. */
             <section className="home-resultados" aria-labelledby="home-resultados-titulo">
               <button className="home-voltar" type="button" onClick={voltarParaInicio}>
@@ -317,7 +413,12 @@ function Home({ resenhas, perfil, onCriarResenha, onSair }) {
 
                   <div className="home-lista-jogos">
                     {jogosPesquisa.map((jogo) => (
-                      <article className="home-card-jogo" key={jogo.id_jogo}>
+                      <button
+                        className="home-card-jogo"
+                        type="button"
+                        key={jogo.id_jogo}
+                        onClick={() => abrirJogo(jogo)}
+                      >
                         {jogo.capa_url && (
                           <img src={jogo.capa_url} alt={`Capa de ${jogo.nome}`} />
                         )}
@@ -331,7 +432,7 @@ function Home({ resenhas, perfil, onCriarResenha, onSair }) {
                           </p>
                           <span>{jogo.total_reviews} resenhas</span>
                         </div>
-                      </article>
+                      </button>
                     ))}
                   </div>
                 </section>
