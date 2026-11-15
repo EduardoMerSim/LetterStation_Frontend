@@ -15,8 +15,8 @@ Interface web do **LetterStation**, uma plataforma inspirada no Letterboxd, volt
 
 Antes de começar, é necessário ter instalado:
 
-- [Node.js](https://nodejs.org/) (versão LTS recomendada).
-- npm (instalado junto com o Node.js).
+- [Node.js](https://nodejs.org/) (versão v26.13.0).
+- npm (instalado junto com o Node.js, versão 11.20.0).
 - Git.
 
 ## 📁 Estrutura do projeto
@@ -36,7 +36,7 @@ LetterStation_Frontend/
 1. Clone o repositório:
 
 ```bash
-git clone URL_DO_REPOSITORIO
+git clone https://github.com/EduardoMerSim/LetterStation_Frontend.git
 ```
 
 2. Acesse a pasta do repositório:
@@ -67,7 +67,7 @@ Dentro da pasta `letterstation`, no mesmo nível do `package.json`, crie um arqu
 VITE_API_URL=http://localhost:8000
 ```
 
-**Importante:** o endereço acima é utilizado quando o front-end e o back-end estão sendo executados na mesma máquina.
+**Importante:** o endereço acima é utilizado quando o front-end e o back-end estão sendo executados na mesma máquina, ou seja, o endereço deve corresponder ao endereço local da api.
 
 Não compartilhe arquivos de configuração que contenham chaves ou informações privadas.
 
@@ -104,7 +104,7 @@ O LetterStation disponibiliza as seguintes funcionalidades:
 
 O front-end realiza as requisições à API própria do LetterStation, responsável pelas regras de negócio, autenticação e comunicação com o banco de dados.
 
-O endereço padrão do back-end é:
+O endereço padrão do back-end é, normalmente:
 
 http://localhost:8000
 
@@ -130,6 +130,6 @@ http://localhost:8000/docs
 
 ## 👥 Projeto acadêmico
 
-LetterStation é um projeto acadêmico desenvolvido como parte das atividades do curso de Ciência da Computação.
+LetterStation é um projeto acadêmico desenvolvido como parte das atividades do curso de Ciência da Computação, para o 4º semestre, na disciplina de Aplicações Digitais.
 
 O projeto tem como objetivo desenvolver uma aplicação integrada, utilizando tecnologias de desenvolvimento web, API própria, autenticação e banco de dados relacional.
